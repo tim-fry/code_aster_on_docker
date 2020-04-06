@@ -18,7 +18,7 @@ ENV MUMPS_SRC="mumps-${MUMPS_VER}-aster2.tar.gz"
 ENV ASTER_SRC="aster-${ASTER_VER}.0.tgz"
 ENV SCALAPACK_SRC="http://www.netlib.org/scalapack/scalapack-${SCALAPACK_VER}.tgz"
 ENV PARMETIS_SRC="http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-${PARMETIS_VER}.tar.gz"
-ENV PETSC_SRC="https://bitbucket.org/petsc/petsc/get/v${PETSC_VER}.tar.gz"
+ENV PETSC_SRC="http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-${PETSC_VER}.tar.gz"
 
 ENV ASTER_FULL_SRC="https://www.code-aster.org/FICHIERS/aster-full-src-13.6.0-1.noarch.tar.gz"
 ENV ASTER_ROOT=/home/aster/aster
@@ -52,7 +52,7 @@ RUN wget --no-check-certificate --quiet ${ASTER_FULL_SRC} -O aster_full.tar.gz &
     rm -rf /tmp/aster_full.tar.gz /tmp/aster_full
 
 # Build ptscotch
-COPY --chown=aster:aster code_aster/data/patch_ptscotch /tmp/patch_ptscotch
+COPY --chown=aster:aster data/patch_ptscotch /tmp/patch_ptscotch
 RUN mkdir ptscotch && tar xf ${SCOTCH_SRC} -C ptscotch --strip-components 1 && \
     patch -s -p0 < patch_ptscotch && \
     cd ptscotch/src && \
@@ -83,7 +83,7 @@ RUN wget --no-check-certificate --quiet ${SCALAPACK_SRC} -O scalapack.tar.gz && 
     rm -rf /tmp/scalapack.tar.gz /tmp/scalapack
 
 # Build parallel mumps
-COPY --chown=aster:aster code_aster/data/patch_mumps /tmp/patch_mumps
+COPY --chown=aster:aster data/patch_mumps /tmp/patch_mumps
 RUN mkdir mumps && tar xf ${MUMPS_SRC} -C mumps --strip-components 1 && \
     patch -s -p0 < patch_mumps && \
     cd mumps && \
@@ -112,7 +112,7 @@ RUN wget --no-check-certificate --quiet ${PETSC_SRC} -O petsc.tar.gz && \
                 --with-metis-dir=${PUBLIC}/metis-${METIS_VER} \
                 --with-parmetis-dir=${PUBLIC}/parmetis-${PARMETIS_VER} \
                 --with-ptscotch-dir=${PUBLIC}/ptscotch-${SCOTCH_VER} \
-                --download-hypre --download-ml \
+                --download-hypre \
                 --LIBS="-lgomp" \
                 --prefix=${PUBLIC}/petsc-${PETSC_VER} && \
     make all && \
@@ -120,7 +120,7 @@ RUN wget --no-check-certificate --quiet ${PETSC_SRC} -O petsc.tar.gz && \
     rm -rf /tmp/petsc.tar.gz /tmp/petsc
 
 # Build parallel aster
-COPY --chown=aster:aster code_aster/data/cfg.py /tmp/cfg.py
+COPY --chown=aster:aster data/cfg.py /tmp/cfg.py
 RUN . ${ASTER_ROOT}/${ASTER_VER}/share/aster/profile_mfront.sh && \
     mkdir aster && tar xf ${ASTER_SRC} -C aster --strip-components 1 && \
     cd aster && \
@@ -152,7 +152,7 @@ RUN . ${ASTER_ROOT}/${ASTER_VER}/share/aster/profile_mfront.sh && \
 
 # Add a welcome message and a script for testcases
 WORKDIR /home/aster
-COPY code_aster/WELCOME /home/aster/WELCOME
+COPY WELCOME /home/aster/WELCOME
 COPY run_tests.sh /home/aster/run_tests.sh
 
 RUN echo "vers : stable_mpi:${ASTER_ROOT}/${ASTER_VER}_mpi/share/aster" >> ${ASTER_ROOT}/etc/codeaster/aster && \
