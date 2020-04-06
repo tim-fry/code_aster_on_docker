@@ -4,9 +4,9 @@ This repository contains the Dockerfiles for building images of [Code_Aster](htt
 
 Some files are based on the [Docker files of the FEniCS project](https://bitbucket.org/fenics-project/docker).
 
-Currently the following images are available:
+Currently three images are available:
 
-1. `quay.io/tianyikillua/code_aster:v13`: a `GCC`-based build of the 13.6 version. Both the sequential and parallel (MPI) versions are available. Its size is around 3 GB.
+1. `quay.io/tianyikillua/code_aster`: a `GCC`-based build of the latest stable version (13.6). Both the sequential and parallel (MPI) versions are available. Its size is around 3.1 GB.
 
 ```
               -- CODE_ASTER -- VERSION : EXPLOITATION (stable) --
@@ -25,37 +25,32 @@ Currently the following images are available:
                      Version de la librairie SCOTCH : 6.0.4
 ```
 
-2. `quay.io/tianyikillua/code_aster`: a `GCC`-based build of the 14.4 version. Both the sequential and parallel (MPI) versions are available. Its size is around 3 GB.
+2. `quay.io/tianyikillua/code_aster_testing`: a `GCC`-based build of the latest testing version (14.2). Currently only the sequential version is available. Its size is around 2.3 GB.
 
 ```
         -- CODE_ASTER -- VERSION : DÉVELOPPEMENT STABILISÉE (testing) --
 
-                     Version 14.4.0 modifiée le 28/06/2019
-                   révision 9aa55c3f2e9e - branche 'default'
-                         Copyright EDF R&D 1991 - 2019
+                     Version 14.2.0 modifiée le 21/06/2018
+                   révision db2699f0662a - branche 'default'
+                         Copyright EDF R&D 1991 - 2018
 
-                           Version de Python : 3.6.8
-                           Version de NumPy : 1.13.3
-                     Version de la librairie HDF5 : 1.10.3
-                      Version de la librairie MED : 4.0.0
-                     Version de la librairie MFront : non disponible
+                           Version de Python : 2.7.12
+                           Version de NumPy : 1.11.0
+                     Version de la librairie HDF5 : 1.8.14
+                      Version de la librairie MED : 3.3.1
+                     Version de la librairie MFront : 3.1.1
                      Version de la librairie MUMPS : 5.1.2
                         Librairie PETSc : non disponible
                      Version de la librairie SCOTCH : 6.0.4
 ```
 
-> For the 14.4 version, currently PETSc is not supported. It may be tricky to compile PETSc with 64-bit support.
+3. `quay.io/tianyikillua/salome_meca`: the latest release of [Salome_Meca](https://www.code-aster.org/V2/spip.php?article295) (2018). Only the sequential version is available, but `aster` is compiled with Intel compilers that in general give better performance. Additional packages such as `ecrevisse` are also provided. Unnecessary modules could in fact be removed to reduce the image size, which is currently around 4.1 GB.
 
-3. `quay.io/tianyikillua/salome_meca`: the official releases of [Salome_Meca](https://www.code-aster.org/V2/spip.php?article295) Only the sequential version is available, but `aster` is compiled with Intel compilers that in general give better performance. Additional packages such as `ecrevisse` are also provided. Unnecessary modules could in fact be removed to reduce the image size, which is currently around 4.1 GB.
-
-> There is a `profile.sh` issue in the latest 2019 version such that the `as_run` command does not work properly. To investigate.
-
-| Image name                         | Build status                                                 | Description                         | Version |
-| ---------------------------------- | ------------------------------------------------------------ | ----------------------------------- | ------- |
-| `quay.io/tianyikillua/code_aster`  | [![Docker Repository on Quay](https://quay.io/repository/tianyikillua/code_aster/status "Docker Repository on Quay")](https://quay.io/repository/tianyikillua/code_aster) | Code_Aster | 14.4    |
-| `quay.io/tianyikillua/code_aster:v13`  | [![Docker Repository on Quay](https://quay.io/repository/tianyikillua/code_aster_testing/status "Docker Repository on Quay")](https://quay.io/repository/tianyikillua/code_aster) | Code_Aster | 13.6    |
-| `quay.io/tianyikillua/salome_meca` | [![Docker Repository on Quay](https://quay.io/repository/tianyikillua/salome_meca/status "Docker Repository on Quay")](https://quay.io/repository/tianyikillua/salome_meca) | Salome_Meca       | 2019    |
-| `quay.io/tianyikillua/salome_meca:v2018` | [![Docker Repository on Quay](https://quay.io/repository/tianyikillua/salome_meca/status "Docker Repository on Quay")](https://quay.io/repository/tianyikillua/salome_meca) | Salome_Meca       | 2018    |
+| Image name                         | Build status                                                 | Description                         | Version | Size   |
+| ---------------------------------- | ------------------------------------------------------------ | ----------------------------------- | ------- | ------ |
+| `quay.io/tianyikillua/code_aster`  | [![Docker Repository on Quay](https://quay.io/repository/tianyikillua/code_aster/status "Docker Repository on Quay")](https://quay.io/repository/tianyikillua/code_aster) | Latest stable version of Code_Aster | 13.6    | 3.1 GB |
+| `quay.io/tianyikillua/code_aster_testing`  | [![Docker Repository on Quay](https://quay.io/repository/tianyikillua/code_aster_testing/status "Docker Repository on Quay")](https://quay.io/repository/tianyikillua/code_aster_testing) | Latest testing version of Code_Aster | 14.2    | 2.3 GB |
+| `quay.io/tianyikillua/salome_meca` | [![Docker Repository on Quay](https://quay.io/repository/tianyikillua/salome_meca/status "Docker Repository on Quay")](https://quay.io/repository/tianyikillua/salome_meca) | Latest release of Salome_Meca       | 2018    | 4.1 GB |
 
 ### Introduction and usage
 
@@ -127,16 +122,11 @@ F mess /home/aster/shared/test.mess R 6
 F resu /home/aster/shared/test.resu R 8
 ```
 
-2. In order to use the parallel version, these are the related variables in the `export` file
+2. In order to use the parallel version, you should have
 
 ```
 P version stable_mpi
-P mpi_nbcpu 4 -> number of CPU cores
-P mpi_nbnoeud 1 -> number of nodes
-P ncpus 1 -> number of threads (OpenMP)
 ```
-
-It is recommended to read the [official Code_Aster documentation on parallelism](https://www.code-aster.org/V2/doc/default/en/man_u/u2/u2.08.06.pdf).
 
 #### Running simulation via a direct `as_run` command
 
@@ -152,7 +142,7 @@ Note that you have to specify the absolute path of `as_run` (`/home/aster/aster/
 
 You can also use the graphical interface `astk` to run your simulations, which will automatically write an `export` file for you.
 
-1. For Windows users, download and open a X11 server via [MobaXterm](https://mobaxterm.mobatek.net), etc.
+1. For Windows users, download and open a X11 server via [MobaXterm](https://mobaxterm.mobatek.net) or [vcXsrc](https://sourceforge.net/projects/vcxsrv), etc.
 2. Get your IP address (use `ipconfig` for Windows users)
 3. Run the following in the directory containing simulations files
 
@@ -180,8 +170,6 @@ export ASRUN="/home/aster/aster/bin/as_run --vers stable_mpi"
 ```
 
 Using the sequential and parallel versions provided here, only the following tests fail mainly due to lack of some features not provided by the `aster-full` package.
-
-> The following tests are reported for the 13.6 version.
 
 - Missing `xmgrace` (20 cases)
 
@@ -274,4 +262,4 @@ Since back-end virtualization may still be used by Docker under Mac and Windows,
 
 ### Author
 
-[Tianyi Li](https://www.linkedin.com/in/tianyikillua) ([tianyikillua@gmail.com](mailto:tianyikillua@gmail.com))
+[Tianyi Li](https://www.linkedin.com/in/tianyikillua) ([tianyikillua@gmail.com](mailto:tianyikillua@gmail.com)) @ [Promold](https://www.linkedin.com/company/promold-paris)

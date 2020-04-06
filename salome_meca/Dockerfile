@@ -12,19 +12,22 @@ RUN apt-get update && \
 USER aster
 WORKDIR /home/aster
 RUN wget --no-check-certificate --quiet \
-    https://www.code-aster.org/FICHIERS/salome_meca-2019.0.1-2-LGPL.tgz && \
-    tar xf salome_meca-2019.0.1-2-LGPL.tgz && \
-    ./salome_meca-2019.0.1-2-LGPL.run && \
-    rm salome_meca-2019.0.1-2-LGPL.*
+    https://www.code-aster.org/FICHIERS/salome_meca-2018-LGPL-1.tgz && \
+    tar xf salome_meca-2018-LGPL-1.tgz && \
+    ./salome_meca-2018-LGPL-1.run && \
+    rm salome_meca-2018-LGPL-1.*
+    # rm -rf salome_meca/appli_V2018 salome_meca/V2018/modules && \
+    # cd salome_meca/V2018/prerequisites && \
+    # rm -rf Paraview-v541p2 Qt-591
 
 # Add as_run into PATH
 RUN echo "" >> .bashrc && \
-    echo "source ~/salome_meca/V2019_univ/salome_prerequisites.sh" >> .bashrc && \
+    echo "source ~/salome_meca/V2018/salome_prerequisites.sh" >> .bashrc && \
     echo "cat ~/WELCOME" >> .bashrc && \
     echo "echo" >> .bashrc
 
 # Add a welcome message and a script for testcases
-COPY --chown=aster:aster salome_meca/WELCOME /home/aster/WELCOME
-COPY --chown=aster:aster run_tests.sh /home/aster/run_tests.sh
+COPY salome_meca/WELCOME /home/aster/WELCOME
+COPY run_tests.sh /home/aster/run_tests.sh
 
 USER root
