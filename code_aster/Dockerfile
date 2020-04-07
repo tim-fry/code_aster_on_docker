@@ -1,5 +1,4 @@
-FROM quay.io/tianyikillua/base:latest
-LABEL maintainer "Tianyi Li <tianyikillua@gmail.com>"
+FROM ubuntu:18.04
 
 # Variables
 ENV HDF5_VER=1.8.14
@@ -21,14 +20,18 @@ ENV PARMETIS_SRC="http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/parmetis-${
 ENV PETSC_SRC="http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-${PETSC_VER}.tar.gz"
 
 ENV ASTER_FULL_SRC="https://www.code-aster.org/FICHIERS/aster-full-src-13.6.0-1.noarch.tar.gz"
-ENV ASTER_ROOT=/home/aster/aster
+ENV ASTER_ROOT=/opt/aster
 ENV PUBLIC=$ASTER_ROOT/public
 
 # Get Ubuntu updates and basic packages
-USER root
 RUN apt-get update && \
     apt-get upgrade -y --with-new-pkgs -o Dpkg::Options::="--force-confold" && \
     apt-get install -y \
+    gcc g++ gfortran \
+    vim wget \
+    python \
+    python-dev \
+    python-numpy \
     patch \
     make cmake \
     zlib1g-dev \
@@ -40,7 +43,6 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-USER aster
 WORKDIR /tmp
 
 # Download and install the latest stable version
@@ -52,7 +54,7 @@ RUN wget --no-check-certificate --quiet ${ASTER_FULL_SRC} -O aster_full.tar.gz &
     rm -rf /tmp/aster_full.tar.gz /tmp/aster_full
 
 # Build ptscotch
-COPY --chown=aster:aster data/patch_ptscotch /tmp/patch_ptscotch
+COPY data/patch_ptscotch /tmp/patch_ptscotch
 RUN mkdir ptscotch && tar xf ${SCOTCH_SRC} -C ptscotch --strip-components 1 && \
     patch -s -p0 < patch_ptscotch && \
     cd ptscotch/src && \
@@ -83,7 +85,7 @@ RUN wget --no-check-certificate --quiet ${SCALAPACK_SRC} -O scalapack.tar.gz && 
     rm -rf /tmp/scalapack.tar.gz /tmp/scalapack
 
 # Build parallel mumps
-COPY --chown=aster:aster data/patch_mumps /tmp/patch_mumps
+COPY data/patch_mumps /tmp/patch_mumps
 RUN mkdir mumps && tar xf ${MUMPS_SRC} -C mumps --strip-components 1 && \
     patch -s -p0 < patch_mumps && \
     cd mumps && \
@@ -120,7 +122,7 @@ RUN wget --no-check-certificate --quiet ${PETSC_SRC} -O petsc.tar.gz && \
     rm -rf /tmp/petsc.tar.gz /tmp/petsc
 
 # Build parallel aster
-COPY --chown=aster:aster data/cfg.py /tmp/cfg.py
+COPY data/cfg.py /tmp/cfg.py
 RUN . ${ASTER_ROOT}/${ASTER_VER}/share/aster/profile_mfront.sh && \
     mkdir aster && tar xf ${ASTER_SRC} -C aster --strip-components 1 && \
     cd aster && \
@@ -150,17 +152,6 @@ RUN . ${ASTER_ROOT}/${ASTER_VER}/share/aster/profile_mfront.sh && \
     ./waf install && \
     rm -rf /tmp/${ASTER_SRC} /tmp/cfg.py /tmp/aster
 
-# Add a welcome message and a script for testcases
-WORKDIR /home/aster
-COPY WELCOME /home/aster/WELCOME
-COPY run_tests.sh /home/aster/run_tests.sh
-
 RUN echo "vers : stable_mpi:${ASTER_ROOT}/${ASTER_VER}_mpi/share/aster" >> ${ASTER_ROOT}/etc/codeaster/aster && \
     echo "localhost" > ${ASTER_ROOT}/etc/codeaster/mpi_hostfile && \
-    rm -rf /tmp/* && \
-    echo "" >> .bashrc && \
-    echo "source ~/aster/etc/codeaster/profile.sh" >> .bashrc && \
-    echo "cat ~/WELCOME" >> .bashrc && \
-    echo "echo" >> .bashrc
-
-USER root
+    rm -rf /tmp/*
